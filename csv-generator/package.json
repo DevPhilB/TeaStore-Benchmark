@@ -1,0 +1,26 @@
+{
+  "name": "csv-generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DevPhilB/TeaStore-Benchmark.git"
+  },
+  "author": "Philipp Backes",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/DevPhilB/TeaStore-Benchmark/issues"
+  },
+  "homepage": "https://github.com/DevPhilB/TeaStore-Benchmark#readme",
+  "private": true,
+  "dependencies": {
+    "csv-stringify": "^5.6.4",
+    "faker": "^5.5.3",
+    "random-js": "^2.1.0"
+  }
+}

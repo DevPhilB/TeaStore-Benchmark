@@ -3,3 +3,5 @@ curl
 quiche
 *.o
 benchmark
+node_modules
+*.csv
