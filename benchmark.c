@@ -12,38 +12,50 @@
  * limitations under the License.
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
- 
-int main(void)
-{
+
+int main(void) {
   CURL *curl;
   CURLcode response;
-  char url[100];
-  char protocol[] = "http://";
-  char host[] = "localhost:80";
-  char path[] = "/api/web/index";
   long version = 2l; // 2, 3, 30
+  int requests = 900;
+
+  FILE* stream = fopen("fake.csv", "r");
+
+  char line[requests];
  
   curl = curl_easy_init();
   if(curl) {
-    strcat(url, protocol);
-    strcat(url, host);
-    strcat(url, path);
-
-    curl_easy_setopt(curl, CURLOPT_URL, url);
- 
     // Switch between HTTP Versions
     curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, version);
-    
- 
-    /* Perform the request, res will get the return code */
-    response = curl_easy_perform(curl);
-    /* Check for errors */
-    if(response != CURLE_OK) {
-      fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(response));
-    } else {
-      fprintf(stdout, "curl_easy_perform() was successful!");
+
+    while (fgets(line, requests, stream)) {
+        char* lineCopy = strdup(line);
+        char* method = strtok(lineCopy, ";");
+        char* url = strtok(NULL, ";");
+        char* body = strtok(NULL, ";");
+        //
+        curl_easy_setopt(curl, CURLOPT_URL, url);
+        // For post requests
+        if (!body && strstr(url, "logioaction") != NULL) {
+          curl_easy_setopt(curl, CURLOPT_POST, 1L);
+        } else if (body) {
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(body));
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body);
+        }
+  
+        /* Perform the request, res will get the return code */
+        response = curl_easy_perform(curl);
+        /* Check for errors */
+        if(response != CURLE_OK) {
+          fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(response));
+        } else {
+          fprintf(stdout, "curl_easy_perform() was successful!");
+        }
+
+        free(lineCopy);
     }
 
     /* Always cleanup */

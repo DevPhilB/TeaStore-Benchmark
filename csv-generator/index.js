@@ -20,52 +20,125 @@ const stringify = require('csv-stringify');
 // Sets locale to de
 faker.locale = "de";
 const seed = process.argv[0] | 42;
+const loops = process.argv[1] | 100;
 const random = new Random(MersenneTwister19937.seed(seed));
 faker.seed(seed);
 
-// Fake
-// UserId 0-99
-// Category 2-6
-// ProductId C2 (7-106), C3 (107-206), C4 (207-306), C5 (307-406), C6 (407-506)
-/* Order JSON
-{
-    "id": null,
-    "userId": null,
-    "time": null,
-    "totalPriceInCents": null,
-    "addressName": "address.companyName",
-    "address1": "address.streetName + address.streetAddress",
-    "address2": "address.zipCode + address.city",
-    "creditCardCompany": "",
-    "creditCardNumber": "finance.creditCardNumber",
-    "creditCardExpiryDate": "date.future"
+// Set request number
+const protocol = "http://"
+const url = "localhost:80"
+
+const INDEX = "/api/web/index";
+const LOGIN = "/api/web/login";
+const LOGIO = "/api/web/logioaction";
+const CATEGORY = "/api/web/category";
+const PRODUCT = "/api/web/product";
+const ADDTOCART = "/api/web/cartaction/addtocart";
+const PROCEEDTOCHECKOUT = "/api/web/proceedtocheckout";
+const CONFIRM = "/api/web/confirm";
+
+const method = [];
+const requests = [];
+const bodies = [];
+
+for (let index = 0; index < loops; index++) {
+    
+    // UserId 0-99
+    const userId = random.integer(0, 99);
+    // Category 2-6
+    const category = random.integer(2, 6);
+    // ProductId C2 (7-106), C3 (107-206), C4 (207-306), C5 (307-406), C6 (407-506)
+    let min, max;
+    switch (category) {
+        case 2:
+            min = 7, max = 106;
+            break;
+        case 3:
+            min = 107, max = 206;
+            break;
+        case 4:
+            min = 207, max = 306;
+            break;
+        case 5:
+            min = 307, max = 406;
+            break;
+        case 6:
+            min = 407, max = 506;
+            break;
+        default: break;
+    }
+    const productId = random.integer(min, max);
+    // Order JSON
+    const addressName = faker.company.companyName();
+    const address1 = faker.address.streetName() + faker.address.streetAddress();
+    const address2 = faker.address.zipCode() + faker.address.city();
+    const creditCardCompany = random.integer(0, 1) == 0 ? "MasterCard" : "Visa";
+    const creditCardNumber = faker.finance.creditCardNumber();
+    const creditCardExpiryDate = faker.date.future();
+
+    const orderJson = {
+        "id": null,
+        "userId": null,
+        "time": null,
+        "totalPriceInCents": null,
+        "addressName": addressName,
+        "address1": address1,
+        "address2": address2,
+        "creditCardCompany": creditCardCompany,
+        "creditCardNumber": creditCardNumber,
+        "creditCardExpiryDate": creditCardExpiryDate
+    }
+
+    // http://$WEB_SERVICE:$WEB_PORT/api/web/index
+    method.push("GET");
+    requests.push(protocol + url + INDEX);
+    bodies.push("");
+    // http://$WEB_SERVICE:$WEB_PORT/api/web/login
+    method.push("GET");
+    requests.push(protocol + url + LOGIN);
+    bodies.push("");
+    // http://$WEB_SERVICE:$WEB_PORT/api/web/logioaction?username=user97&password=password
+    method.push("POST");
+    requests.push(protocol + url + LOGIO + "?username=user" + userId + "&password=password");
+    bodies.push("");
+    // http://$WEB_SERVICE:$WEB_PORT/api/web/category?id=
+    method.push("GET");
+    requests.push(protocol + url + CATEGORY + "?id=" + category);
+    bodies.push("");
+    // http://$WEB_SERVICE:$WEB_PORT/api/web/product?id=
+    method.push("GET");
+    requests.push(protocol + url + PRODUCT + "?id=" + productId);
+    bodies.push("");
+    // http://$WEB_SERVICE:$WEB_PORT/api/web/cartaction/addtocart?productid=
+    method.push("GET");
+    requests.push(protocol + url + ADDTOCART + "?productid=" + productId);
+    bodies.push("");
+    // http://$WEB_SERVICE:$WEB_PORT/api/web/cartaction/proceedtocheckout
+    method.push("GET");
+    requests.push(protocol + url + PROCEEDTOCHECKOUT);
+    bodies.push("");
+    // http://$WEB_SERVICE:$WEB_PORT/api/web/cartaction/confirm with Order JSON
+    method.push("POST");
+    requests.push(protocol + url + CONFIRM);
+    bodies.push(JSON.stringify(orderJson));
+    bodies.push("");
+    // http://$WEB_SERVICE:$WEB_PORT/api/web/logioaction
+    method.push("POST");
+    requests.push(protocol + url + LOGIO);
+    bodies.push("");
 }
-*/
 
-const addressName = faker.company.companyName();
-const address1 = faker.address.streetName() + faker.address.streetAddress();
-const address2 = faker.address.zipCode() + faker.address.city();
-const creditCardCompany = random.integer(0, 1) == 0 ? "MasterCard" : "Visa";
-const creditCardNumber = faker.finance.creditCardNumber();
-const creditCardExpiryDate = faker.date.future();
-
-const orderJson = {
-    "id": null,
-    "userId": null,
-    "time": null,
-    "totalPriceInCents": null,
-    "addressName": addressName,
-    "address1": address1,
-    "address2": address2,
-    "creditCardCompany": creditCardCompany,
-    "creditCardNumber": creditCardNumber,
-    "creditCardExpiryDate": creditCardExpiryDate
-}
-
-const request = "https://$WEB_SERVICE:$WEB_PORT/api/web/cartaction/confirm";
-const json = JSON.stringify(orderJson);
+const result = method.map((value, index) => {
+    return [value, requests[index], bodies[index]];
+})
 
 // Generate csv file
-stringify([[request, json]], function (err, output) {
-    fs.writeFileSync('./fake.csv', output);
-});
+stringify(
+    result,
+    {
+        delimiter: ';'
+    },
+    function (err, output) {
+    fs.writeFileSync('../fake.csv', output);
+    }
+);

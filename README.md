@@ -2,7 +2,8 @@
 Custom benchmark tool using [libcurl](https://curl.se/libcurl).  
 Designed for [TeaStore v2](https://github.com/DevPhilB/TeaStore).
 
-## Unzip & copy files
+## Setup (WIP)
+### Unzip & copy files
 ```sh
 unzip curl.zip
 ```
@@ -34,12 +35,12 @@ cp -a /curl/include/. /usr/local/include/
  cp /quiche/lib/libquiche.so /usr/lib/x86_64-linux-gnu/libquiche.so
 ```
 
-## Cleanup
+## Clean up
 ```sh
  rm -r curl quiche
 ```
 
-## Compile & run
+## Generate CSV, compile C code and run benchmark
 ```sh
- make && ./benchmark
+ cd csv-generator && npm start && cd .. && make && ./benchmark
 ```
