@@ -20,7 +20,7 @@ const stringify = require('csv-stringify');
 // Sets locale to de
 faker.locale = "de";
 const seed = process.argv[0] | 42;
-const loops = process.argv[1] | 100;
+const loops = process.argv[1] | 1000;
 const random = new Random(MersenneTwister19937.seed(seed));
 faker.seed(seed);
 
@@ -109,9 +109,12 @@ for (let index = 0; index < loops; index++) {
     method.push("GET");
     requests.push(protocol + url + PRODUCT + "?id=" + productId);
     bodies.push("");
-    // http://$WEB_SERVICE:$WEB_PORT/api/web/cartaction/addtocart?productid=
+    // 2x http://$WEB_SERVICE:$WEB_PORT/api/web/cartaction/addtocart?productid=
     method.push("GET");
     requests.push(protocol + url + ADDTOCART + "?productid=" + productId);
+    bodies.push("");
+    method.push("GET");
+    requests.push(protocol + url + ADDTOCART + "?productid=" + random.integer(min, max)); // TODO
     bodies.push("");
     // http://$WEB_SERVICE:$WEB_PORT/api/web/cartaction/proceedtocheckout
     method.push("GET");

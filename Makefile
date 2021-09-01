@@ -10,7 +10,7 @@ CC = gcc
 # Compiler flags, -g for debug, -c to make an object file
 CFLAGS = -c -g
 LDFLAGS = -L ./libquiche.a
-LIBS = -lcurl # -lpthread
+LIBS = -lcurl -lm # -lpthread
 
 # Link the target with all objects and libraries
 $(TARGET) : $(OBJS)
