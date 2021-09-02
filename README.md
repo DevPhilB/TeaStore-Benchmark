@@ -1,46 +1,31 @@
 # TeaStore v2 Benchmark
-Custom benchmark tool using [libcurl](https://curl.se/libcurl).  
+CSV generator (JavaScript) to generate workloads for n-Threads.  
+Lua script to use CSV workloads.  
+Custom benchmark tool using [libcurl](https://curl.se/libcurl) (development stopped).  
 Designed for [TeaStore v2](https://github.com/DevPhilB/TeaStore).
 
-## Setup (WIP)
-### Unzip & copy files
+## Setup (for wrk-2)
+## Generate CSV and run benchmark
 ```sh
-unzip curl.zip
+cd csv-generator && npm start -- --seed=42 --threads=2 --loops=100 && cd ..
+wrk -t2 -c100 -R2000 -L -s ./workload.lua http://localhost:80
 ```
 
-### Folders
-### - bin
+## Setup (only libcurl)
+### Follow https://github.com/curl/curl/blob/master/docs/HTTP3.md#quiche-version
+Check for BoringSSL, quiche/X.Y.Z and HTTP/3 support
 ```sh
- cp -a /curl/bin/. /usr/local/bin/
+curl --version
 ```
-
-### - include
+Could be 
 ```sh
-cp -a /curl/include/. /usr/local/include/
-```
-
-### - lib
-```sh
- cp /curl/lib/libcurl.so.4 /usr/lib/x86_64-linux-gnu/libcurl.so.4
- cp /curl/lib/libcurl.so.4.7.0 /usr/lib/x86_64-linux-gnu/libcurl.so.4.7.0
-
- cp /curl/lib/libcurl.a /usr/local/lib/libcurl.a
- cp /curl/lib/libcurl.la /usr/local/lib/libcurl.la
- cp /curl/lib/libcurl.so /usr/local/lib/libcurl.so
-```
-
-### - quiche
-```sh
- cp /quiche/lib/libquiche.a /usr/lib/x86_64-linux-gnu/libquiche.a
- cp /quiche/lib/libquiche.so /usr/lib/x86_64-linux-gnu/libquiche.so
-```
-
-## Clean up
-```sh
- rm -r curl quiche
+curl 7.78.0-DEV (x86_64-pc-linux-gnu) libcurl/7.78.0-DEV BoringSSL quiche/X.Y.Z
+...
+Features: ... HTTP3 ...
 ```
 
 ## Generate CSV, compile C code and run benchmark
+
 ```sh
- cd csv-generator && npm start && cd .. && make && ./benchmark
+cd csv-generator && npm start -- --seed=42 --threads=1 --loops=100 && cd .. && make && ./benchmark
 ```

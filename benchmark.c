@@ -74,7 +74,7 @@ int main(void) {
   double timeToFirstByteStandardDeviation = 0.0;
   double requestsPerSecondStandardDeviation = 0.0;
 
-  FILE* stream = fopen("fake.csv", "r");
+  FILE* stream = fopen("workload-0.csv", "r"); // Can only handle one thread
 
   char line[requests];
  
