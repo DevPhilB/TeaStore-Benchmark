@@ -5,15 +5,24 @@ Custom benchmark tool using [libcurl](https://curl.se/libcurl) (development stop
 Designed for [TeaStore v2](https://github.com/DevPhilB/TeaStore).
 
 ## Setup (for wrk-2)
+### Get and build wrk-2
+Change `/.../TeaStore-Benchmark` to current location before you can run:
+```sh
+git clone https://github.com/giltene/wrk2 && cd wrk2 && make && cd ..
+export PATH=$PATH:/.../TeaStore-Benchmark/wrk2
+```
+
 ### Generate CSV and run benchmark
 ```sh
 cd csv-generator && npm start -- --seed=42 --threads=2 --loops=100 && cd .. && \
 wrk -t2 -c100 -R2000 -L -s ./workload.lua http://localhost:80
 ```
 
+---
+
 ## Setup (only libcurl)
 ### Follow https://github.com/curl/curl/blob/master/docs/HTTP3.md#quiche-version
-Check for BoringSSL, quiche/X.Y.Z and HTTP/3 support
+Check for `BoringSSL`, `quiche/X.Y.Z` and `HTTP/3` support
 ```sh
 curl --version
 ```

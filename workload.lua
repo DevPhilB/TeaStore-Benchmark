@@ -1,17 +1,19 @@
 -- Apache-2.0 License
--- use csv workload data
+-- Use csv workload data
 local open = io.open
 local counter = 0
+local index = 0
+local requestIndex = 0
 local threads = {}
 local requestData = {}
+local requestHeaders = {}
 
 local function read_line(filePath)
   local file = open(filePath, "r") -- read mode
-  --if not file then return nil end
   local requests = {}
-  local index = 0
   for line in io.lines(filePath) do
     local method, path, body = (line .. ";"):match("([^;]*);([^;]*);([^;]*);")
+    if (body == '') then body = nil end
     requests[index] = { method = method, path = path, body = body }
     index = index + 1
   end
@@ -27,19 +29,9 @@ function setup(thread)
   counter = counter + 1
 end
 
--- TODO Use headers/cookies
--- wrk.headers["Content-Type"] = "application/x-www-form-urlencoded"
---response = function(status, headers, body)
---    wrk.headers["Cookie"] = ''
---    for key, value in pairs(headers) do
---        if string.starts(key, "Set-Cooki") then
---            wrk.headers["Cookie"] = wrk.headers["Cookie"] .. string.sub(value, 0, string.find(value, ";") - 1) .. ';'
---        end
---    end
---    cookie = true
---end
-
 function init(args)
+  wrk.headers["Accept"] = "application/json"
+  requestHeaders = wrk.headers
   requests  = 0
   responses = 0
   requestData = read_line("./workload-" .. id .. ".csv")
@@ -49,19 +41,37 @@ function init(args)
 end
 
 function request()
-  local method = requestData[requests].method
-  local path = requestData[requests].path
-  local body = requestData[requests].body
-  local headers = {}
-  if (body == nil or body ~= '') then
-    body = nil
+  if (index > requestIndex) then
+    local method = requestData[requestIndex].method
+    local path = requestData[requestIndex].path
+    local body = requestData[requestIndex].body
+    if (body == nil) then
+      if (wrk.headers["Cookie"]) then
+        local cookie = wrk.headers["Cookie"]
+        wrk.headers = requestHeaders
+        wrk.headers["Cookie"] = cookie
+      else
+        wrk.headers = requestHeaders
+      end
+    else
+      wrk.headers["Content-Length"] = string.len(body)
+      wrk.headers["Content-Type"] = "application/json"
+    end
+    requestIndex = requestIndex + 1
+    requests = requests + 1
+    return wrk.format(method, path, wrk.headers, body)
+  else
+    requestIndex = 0
+    request()
   end
-  requests = requests + 1 
-  return wrk.format(method, path, headers, body)
 end
 
 function response(status, headers, body)
   responses = responses + 1
+  -- Set cookie
+  if (headers["Set-Cookie"]) then
+    wrk.headers["Cookie"] = headers["Set-Cookie"]
+  end
 end
 
 function done(summary, latency, requests)

@@ -5,3 +5,4 @@ quiche
 benchmark
 node_modules
 *.csv
+wrk-2
