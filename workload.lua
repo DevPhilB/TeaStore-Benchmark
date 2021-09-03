@@ -5,14 +5,15 @@ local counter = 0
 local threads = {}
 local requestData = {}
 
-local function read_line(path)
-  local file = open(path, "r") -- read mode
+local function read_line(filePath)
+  local file = open(filePath, "r") -- read mode
   --if not file then return nil end
   local requests = {}
-
-  for line in io.lines(path) do
-    local method, url, body = line:match("([^;]*);([^;]*);([^;]*);")
-    requests[#requests+1] = { method = method, url = url, body = body }
+  local index = 0
+  for line in io.lines(filePath) do
+    local method, path, body = (line .. ";"):match("([^;]*);([^;]*);([^;]*);")
+    requests[index] = { method = method, path = path, body = body }
+    index = index + 1
   end
 
   file:close()
@@ -21,15 +22,12 @@ local function read_line(path)
 end
 
 function setup(thread)
-  requestData = read_line("./workload-" .. counter .. ".csv")
   thread:set("id", counter)
   table.insert(threads, thread)
   counter = counter + 1
 end
 
--- TODO Manipulate requests / use requestData
--- wrk.method = "POST"
--- wrk.body   = "foo=bar&baz=quux"
+-- TODO Use headers/cookies
 -- wrk.headers["Content-Type"] = "application/x-www-form-urlencoded"
 --response = function(status, headers, body)
 --    wrk.headers["Cookie"] = ''
@@ -44,15 +42,22 @@ end
 function init(args)
   requests  = 0
   responses = 0
+  requestData = read_line("./workload-" .. id .. ".csv")
 
   local msg = "thread %d created"
   print(msg:format(id))
 end
 
 function request()
-
-  requests = requests + 1
-  return wrk.request()
+  local method = requestData[requests].method
+  local path = requestData[requests].path
+  local body = requestData[requests].body
+  local headers = {}
+  if (body == nil or body ~= '') then
+    body = nil
+  end
+  requests = requests + 1 
+  return wrk.format(method, path, headers, body)
 end
 
 function response(status, headers, body)

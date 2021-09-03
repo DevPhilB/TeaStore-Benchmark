@@ -5,9 +5,9 @@ Custom benchmark tool using [libcurl](https://curl.se/libcurl) (development stop
 Designed for [TeaStore v2](https://github.com/DevPhilB/TeaStore).
 
 ## Setup (for wrk-2)
-## Generate CSV and run benchmark
+### Generate CSV and run benchmark
 ```sh
-cd csv-generator && npm start -- --seed=42 --threads=2 --loops=100 && cd ..
+cd csv-generator && npm start -- --seed=42 --threads=2 --loops=100 && cd .. && \
 wrk -t2 -c100 -R2000 -L -s ./workload.lua http://localhost:80
 ```
 
@@ -24,7 +24,7 @@ curl 7.78.0-DEV (x86_64-pc-linux-gnu) libcurl/7.78.0-DEV BoringSSL quiche/X.Y.Z
 Features: ... HTTP3 ...
 ```
 
-## Generate CSV, compile C code and run benchmark
+### Generate CSV, compile C code and run benchmark
 
 ```sh
 cd csv-generator && npm start -- --seed=42 --threads=1 --loops=100 && cd .. && make && ./benchmark

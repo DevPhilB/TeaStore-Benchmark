@@ -20,16 +20,16 @@ const stringify = require('csv-stringify');
 // Sets locale to de
 faker.locale = "de";
 // Use command line arguments
-const seed = parseInt(process.argv[2].split(":")[1], 10);
-const threads = parseInt(process.argv[3].split(":")[1], 10);
-const loops = parseInt(process.argv[4].split(":")[1], 10);
+const seed = parseInt(process.argv[2].split("=")[1], 10);
+const threads = parseInt(process.argv[3].split("=")[1], 10);
+const loops = parseInt(process.argv[4].split("=")[1], 10);
 // Configure seed
 const random = new Random(MersenneTwister19937.seed(seed));
 faker.seed(seed);
 
-// Set protocol and URL (configured for HTTP/1.1)
-const protocol = "http://";
-const url = "localhost:80";
+// Disabled for wrk2
+// const protocol = "http://";
+// const url = "localhost:80";
 
 // API paths
 const INDEX = "/api/web/index";
@@ -110,59 +110,61 @@ for (let t = 0; t < threads; t++) {
     let categoryId = generateCategoryId();
     let productId = generateProductIdByCategory(categoryId);
 
+    // Add requests.push(...); for libcurl
+
     // http://$WEB_SERVICE:$WEB_PORT/api/web/index
     method.push("GET");
-    requests.push(protocol + url + INDEX);
+    requests.push(INDEX);
     bodies.push("");
     // http://$WEB_SERVICE:$WEB_PORT/api/web/login
     method.push("GET");
-    requests.push(protocol + url + LOGIN);
+    requests.push(LOGIN);
     bodies.push("");
     // http://$WEB_SERVICE:$WEB_PORT/api/web/logioaction?username=user97&password=password
     method.push("POST");
-    requests.push(protocol + url + LOGIO + "?username=user" + generateUserId() + "&password=password");
+    requests.push(LOGIO + "?username=user" + generateUserId() + "&password=password");
     bodies.push("");
     // http://$WEB_SERVICE:$WEB_PORT/api/web/category?id=
     method.push("GET");
-    requests.push(protocol + url + CATEGORY + "?id=" + categoryId);
+    requests.push(CATEGORY + "?id=" + categoryId);
     bodies.push("");
     // http://$WEB_SERVICE:$WEB_PORT/api/web/product?id=
     method.push("GET");
-    requests.push(protocol + url + PRODUCT + "?id=" + productId);
+    requests.push(PRODUCT + "?id=" + productId);
     bodies.push("");
     // Choose between add two different products or select other category and add product directly
     if (random.bool()) {
       // 2x http://$WEB_SERVICE:$WEB_PORT/api/web/cartaction/addtocart?productid=
       method.push("GET");
-      requests.push(protocol + url + ADDTOCART + "?productid=" + productId);
+      requests.push(ADDTOCART + "?productid=" + productId);
       bodies.push("");
       method.push("GET");
-      requests.push(protocol + url + ADDTOCART + "?productid=" + generateProductIdByCategory(categoryId));
+      requests.push(ADDTOCART + "?productid=" + generateProductIdByCategory(categoryId));
       bodies.push("");
     } else {
       categoryId = generateCategoryId();
       productId = generateProductIdByCategory(categoryId);
       // http://$WEB_SERVICE:$WEB_PORT/api/web/category?id=
       method.push("GET");
-      requests.push(protocol + url + CATEGORY + "?id=" + categoryId);
+      requests.push(CATEGORY + "?id=" + categoryId);
       bodies.push("");
       // http://$WEB_SERVICE:$WEB_PORT/api/web/cartaction/addtocart?productid=
       method.push("GET");
-      requests.push(protocol + url + ADDTOCART + "?productid=" + productId);
+      requests.push(ADDTOCART + "?productid=" + productId);
       bodies.push("");
     }
     // http://$WEB_SERVICE:$WEB_PORT/api/web/cartaction/proceedtocheckout
     method.push("GET");
-    requests.push(protocol + url + PROCEEDTOCHECKOUT);
+    requests.push(PROCEEDTOCHECKOUT);
     bodies.push("");
     // http://$WEB_SERVICE:$WEB_PORT/api/web/cartaction/confirm with Order JSON
     method.push("POST");
-    requests.push(protocol + url + CONFIRM);
+    requests.push(CONFIRM);
     bodies.push(generateOrderJson());
     bodies.push("");
     // http://$WEB_SERVICE:$WEB_PORT/api/web/logioaction
     method.push("POST");
-    requests.push(protocol + url + LOGIO);
+    requests.push(LOGIO);
     bodies.push("");
   }
 
