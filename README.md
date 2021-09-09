@@ -1,26 +1,28 @@
 # TeaStore v2 Benchmark
 CSV generator (JavaScript) to generate workloads for n-Threads.  
-Lua script to use CSV workloads.  
-Custom benchmark tool using [libcurl](https://curl.se/libcurl) (development stopped).  
+Lua script to use these CSV workloads.  
 Designed for [TeaStore v2](https://github.com/DevPhilB/TeaStore).
 
-## Setup (for wrk-2)
-### Get and build wrk-2
+## Setup (for wrk2)
+### Get and build wrk2
 Change `/.../TeaStore-Benchmark` to current location before you can run:
 ```sh
 git clone https://github.com/giltene/wrk2 && cd wrk2 && make && cd ..
 export PATH=$PATH:/.../TeaStore-Benchmark/wrk2
 ```
 
+*Loops = Req/s * duration / 10*
+
 ### Generate CSV and run benchmark
 ```sh
-cd csv-generator && npm start -- --seed=42 --threads=2 --loops=100 && cd .. && \
-wrk -t2 -c100 -R2000 -L -s ./workload.lua http://localhost:80
+cd csv-generator && npm start -- --seed=42 --threads=10 --loops=150 && cd .. && \
+wrk -t10 -c10 -d30s -R50 -L -s ./workload.lua http://localhost:80
 ```
 
 ---
 
-## Setup (only libcurl)
+**Development stopped** for custom benchmark tool, which uses [libcurl](https://curl.se/libcurl)!
+## Setup (for custom benchmark tool)
 ### Follow https://github.com/curl/curl/blob/master/docs/HTTP3.md#quiche-version
 Check for `BoringSSL`, `quiche/X.Y.Z` and `HTTP/3` support
 ```sh
@@ -34,7 +36,6 @@ Features: ... HTTP3 ...
 ```
 
 ### Generate CSV, compile C code and run benchmark
-
 ```sh
-cd csv-generator && npm start -- --seed=42 --threads=1 --loops=100 && cd .. && make && ./benchmark
+cd csv-generator && npm start -- --seed=42 --threads=10 --loops=150 && cd .. && make && ./benchmark
 ```

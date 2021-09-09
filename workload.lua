@@ -60,9 +60,6 @@ function request()
     requestIndex = requestIndex + 1
     requests = requests + 1
     return wrk.format(method, path, wrk.headers, body)
-  else
-    requestIndex = 0
-    request()
   end
 end
 
